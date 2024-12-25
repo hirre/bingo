@@ -1,6 +1,7 @@
 from hashlib import sha256
 import random
 import uuid          
+import copy
 
 class BingoBoard:
     __board_data = list[list[int]]
@@ -85,20 +86,74 @@ class PrizeDistribution:
     def get_prizes(self) -> list[int]:
         return sorted(self.__prize_distribution.keys())
     
+def get_unique_board(checksum_dict: dict[str, bool]) -> BingoBoard:
+    not_found = True
+    while not_found:
+        board = BingoBoard()
+        checksum = board.get_checksum()
+        
+        if checksum not in checksum_dict:
+            checksum_dict[checksum] = True
+            not_found = False
+            return board
+                
 def generate_boards(nr_of_boards: int) -> list[BingoBoard]:
     checksum_dict: dict[str, bool] = {}
     boards: list[BingoBoard] = []
     
-    for x in range(nr_of_boards):
-        not_found = True
-        
-        while not_found:
-            board = BingoBoard()
-            checksum = board.get_checksum()
-            
-            if checksum not in checksum_dict:
-                checksum_dict[checksum] = True
-                not_found = False
-                boards.append(board)
+    for x in range(nr_of_boards):        
+        boards.append(get_unique_board(checksum_dict))
                 
     return boards
+
+def generate_game_cards(nr_of_cards: int, prize_distribution: PrizeDistribution) -> tuple[list[BingoCard], dict[int,list[int]]]:
+    checksum_dict: dict[str, bool] = {}
+    loose_cards = []
+    win_cards = []
+    prize_dict: dict[int, list[int]] = {}
+    row_index = 0
+    round_robin = 0
+    
+    for prize in prize_distribution.get_prizes():
+        if prize == 0:
+            continue
+        
+        board = get_unique_board(checksum_dict)
+        
+        board_data = board.get_board_data()
+        
+        prize_row = [
+                    board_data[0][row_index], 
+                    board_data[1][row_index], 
+                    board_data[2][row_index], 
+                    board_data[3][row_index],
+                    board_data[4][row_index]
+                ]
+        
+        prize_dict[prize] = prize_row
+                
+        # Store the prize board for the lottery in a board card with other random boards
+        # Create nr_of_cards * probability of winning rows copies of the board
+        for x in range(int(nr_of_cards * prize_distribution.get_probability(prize))):
+            copy_board = copy.deepcopy(board)
+            card_boards = [BingoBoard() for _ in range(5)]  # Create 5 instances of BingoBoard
+            card_boards[round_robin] = copy_board # insert winning board at round_robin index
+            
+            if round_robin + 1 > 4:
+                round_robin = 0
+            else:
+                round_robin += 1
+                
+            win_cards.append(BingoCard(card_boards))
+            
+        row_index += 1
+                
+    for x in range(nr_of_cards - len(win_cards)):
+        loose_cards.append(BingoCard([BingoBoard() for _ in range(5)]))
+        
+    loose_cards.extend(win_cards)
+    
+    # Shuffle the cards
+    random.shuffle(loose_cards)
+        
+    return (loose_cards, prize_dict)
