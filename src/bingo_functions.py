@@ -1,6 +1,6 @@
 from hashlib import sha256
 import random
-
+import uuid
 
 def generate_boards(nr_of_boards: int) -> list['BingoBoard']:
     checksum_dict: dict[str, bool] = {}
@@ -22,7 +22,7 @@ def generate_boards(nr_of_boards: int) -> list['BingoBoard']:
             
 
 class BingoBoard:
-    __board_data = [list[int]]
+    __board_data = list[list[int]]
     __checksum = ""
     
     def __init__(self):
@@ -66,13 +66,18 @@ class BingoBoard:
     
     
 class BingoCard:
-    __boards = [BingoBoard]       
+    __boards = [BingoBoard]
+    __id: uuid.UUID       
         
     def __init__(self, boards: list[BingoBoard]):
         self.__boards = boards
+        self.__id = uuid.uuid4()
     
     def get_boards(self) -> list[BingoBoard]:
         return self.__boards
+    
+    def get_id(self) -> uuid.UUID:
+        return self.__id
         
         
 class PrizeDistribution: 
