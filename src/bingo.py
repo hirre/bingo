@@ -1,9 +1,10 @@
 import copy
 import timeit
 import bingo_functions as bf
+from bingo_functions import BingoCard, BingoBoard, PrizeDistribution
 import random
 
-def generate_game_cards(nr_of_cards: int, prize_distribution: bf.PrizeDistribution) -> tuple[list[bf.BingoCard], dict[int,list[int]]]:
+def generate_game_cards(nr_of_cards: int, prize_distribution: PrizeDistribution) -> tuple[list[BingoCard], dict[int,list[int]]]:
     loose_cards = []
     win_cards = []
     prize_dict: dict[int, list[int]] = {}
@@ -15,7 +16,9 @@ def generate_game_cards(nr_of_cards: int, prize_distribution: bf.PrizeDistributi
             continue
         
         board = bf.generate_boards(1)[0]
+        
         board_data = board.get_board_data()
+        
         prize_row = [
                     board_data[0][row_index], 
                     board_data[1][row_index], 
@@ -30,7 +33,7 @@ def generate_game_cards(nr_of_cards: int, prize_distribution: bf.PrizeDistributi
         # Create nr_of_cards * probability of winning rows copies of the board
         for x in range(int(nr_of_cards * prize_distribution.get_probability(prize))):
             copy_board = copy.deepcopy(board)
-            card_boards = [bf.BingoBoard() for _ in range(5)]  # Create 5 instances of BingoBoard
+            card_boards = [BingoBoard() for _ in range(5)]  # Create 5 instances of BingoBoard
             card_boards[round_robin] = copy_board # insert winning board at round_robin index
             
             if round_robin + 1 > 4:
@@ -38,12 +41,12 @@ def generate_game_cards(nr_of_cards: int, prize_distribution: bf.PrizeDistributi
             else:
                 round_robin += 1
                 
-            win_cards.append(bf.BingoCard(card_boards))
+            win_cards.append(BingoCard(card_boards))
             
         row_index += 1
                 
     for x in range(nr_of_cards - len(win_cards)):
-        loose_cards.append(bf.BingoCard([bf.BingoBoard() for _ in range(5)]))
+        loose_cards.append(BingoCard([BingoBoard() for _ in range(5)]))
         
     loose_cards.extend(win_cards)
     
@@ -55,7 +58,7 @@ def generate_game_cards(nr_of_cards: int, prize_distribution: bf.PrizeDistributi
 if __name__ == "__main__":
     print("Bingo Game\n")
     
-    prize_distribution = bf.PrizeDistribution()
+    prize_distribution = PrizeDistribution()
     
     prize_distribution.add_prize(500, 0.0002)
     prize_distribution.add_prize(1000, 0.0001)

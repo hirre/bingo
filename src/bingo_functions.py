@@ -1,25 +1,6 @@
 from hashlib import sha256
 import random
-import uuid
-
-def generate_boards(nr_of_boards: int) -> list['BingoBoard']:
-    checksum_dict: dict[str, bool] = {}
-    boards = [BingoBoard]
-    
-    for x in range(nr_of_boards):
-        not_found = True
-        
-        while not_found:
-            board = BingoBoard()
-            checksum = board.get_checksum()
-            
-            if checksum not in checksum_dict:
-                checksum_dict[checksum] = True
-                not_found = False
-                boards.append(board)
-                
-    return boards
-            
+import uuid          
 
 class BingoBoard:
     __board_data = list[list[int]]
@@ -64,7 +45,6 @@ class BingoBoard:
     def get_board_data(self) -> list[list[int]]:
         return self.__board_data
     
-    
 class BingoCard:
     __boards = [BingoBoard]
     __id: uuid.UUID       
@@ -78,8 +58,7 @@ class BingoCard:
     
     def get_id(self) -> uuid.UUID:
         return self.__id
-        
-        
+             
 class PrizeDistribution: 
     __prize_distribution: dict[int, float] = { }
     
@@ -105,3 +84,21 @@ class PrizeDistribution:
     
     def get_prizes(self) -> list[int]:
         return sorted(self.__prize_distribution.keys())
+    
+def generate_boards(nr_of_boards: int) -> list[BingoBoard]:
+    checksum_dict: dict[str, bool] = {}
+    boards: list[BingoBoard] = []
+    
+    for x in range(nr_of_boards):
+        not_found = True
+        
+        while not_found:
+            board = BingoBoard()
+            checksum = board.get_checksum()
+            
+            if checksum not in checksum_dict:
+                checksum_dict[checksum] = True
+                not_found = False
+                boards.append(board)
+                
+    return boards
