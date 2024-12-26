@@ -11,7 +11,7 @@ class BingoBoard:
         self.__board_data = self.__generate_board_data()
         self.__checksum = sha256(str(self.__board_data).encode()).hexdigest()
             
-    # Generate board a 3*5 x 5, three separate 5x5 board grids with unique number per cell and column
+    # Generate a 3*5 x 5 board, with a unique number per cell and board
     def __generate_board_data(self) -> list[list[int]]:
         bColumn = self.__generate_random_numbers(1, 16)
         iColumn = self.__generate_random_numbers(17, 32)
