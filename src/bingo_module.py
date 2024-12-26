@@ -65,6 +65,15 @@ class BingoCard:
 class PrizeDistribution: 
     __prize_distribution: dict[int, float] = { }
     
+    # Calculate expected value of the game 
+    def expected_value(self) -> float:
+        expected_value = 0.0
+        
+        for prize in self.__prize_distribution.keys():
+            expected_value += prize * self.__prize_distribution[prize]
+        
+        return expected_value
+      
     def add_prize(self, prize: int, probability: float) -> None:
         
         if prize == 0:
@@ -132,12 +141,14 @@ class BingoCardGenerator:
                         winning_board_data[4][winning_row_index]
                     ]
             
+            nr_of_winning_cards = int(nr_of_cards * prize_distribution.get_probability(prize))
+            
             # Store the winning combination for the prize
-            prize_combo_dict[prize] = winning_combo
+            prize_combo_dict[prize] = winning_combo if nr_of_winning_cards != 0 else []
                     
             # Store the prize board for the lottery in a board card with other random boards
             # Create nr_of_cards * probability of winning cards
-            for x in range(int(nr_of_cards * prize_distribution.get_probability(prize))):
+            for x in range(nr_of_winning_cards):
                 card_boards = [self.__get_unique_board(checksum_dict) for _ in range(5)]  # Create 5 instances of BingoBoard
                 card_boards[round_robin] = winning_board # insert winning board at round_robin index
                 
@@ -145,7 +156,7 @@ class BingoCardGenerator:
                     round_robin = 0
                 else:
                     round_robin += 1
-                    round_robin = (round_robin + 1) % 5
+
                 win_cards.append(BingoCard(card_boards))
                 
             winning_row_index += 1
